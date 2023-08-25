@@ -3,18 +3,15 @@
     padding: 0;
     box-sizing: border-box;
 }
-.container{
-    position: absolute;
-    top: 50px;
-}
+
 
 .heading{
     text-align: center;
     padding: 40px;
     font-size: 40px;
     text-decoration: underline;
-    position: relative;
-  margin-left: 520px;
+   
+ 
     color: crimson;
 }
 #gif_test.paused {
@@ -42,7 +39,7 @@
     border: 2px black solid;
     top: 25px;
     left: 370px;
-    position: absolute;
+    position: relative;
     background-size: 100%;
     display: flex;
     flex-direction: row;
@@ -50,42 +47,99 @@
     align-items: center;
 }
 
-.buttons{
-    position: absolute;
-    /* top: 125px; */
-    bottom: 378px;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-}
-
-.grp1{
-    position: relative;
-    right: 40px;
-    top: 17px;
-    display: flex;
-    flex-direction: row;
-    gap: 6px;
-    justify-content: center;
-    align-items: center;
+.para{
+  background-color: rgba(255, 255, 0, 0.782);
+  font-weight: bold;
+  position: absolute;
+  left:188px;
+  text-align: center;
 
 }
 
-.grp2{
-    position: relative;
-    right: -27px;
-    top: 17px;
-    display: flex;
-    flex-direction: row;
-    gap: 6px;
-    justify-content: center;
-    align-items: center;
-
+.para2{
+  background-color: rgba(255, 255, 0, 0.662);
+  font-weight: bold;
+  position: absolute;
+  right:70px;
+  top:30%;
+  text-align: center;
 }
-
+.para3{
+  background-color: rgba(255, 255, 0, 0.663);
+  font-weight: bold;
+  position: absolute;
+  right: 258px;
+  top: 45%;
+  
+}
+.para4{
+  background-color: rgba(255, 255, 0, 0.663);
+  font-weight: bold;
+  position: absolute;
+  right: 435px;
+  top: 41%;
+  
+}
+.arrow{
+  position: absolute;
+  height: 138px;
+  width: 33px;
+  right: 213px;
+  top: 31%;
+}
+.arrow2{
+  height: 82px;
+  width: 33px;
+  right: 397px;
+  top: 41%;
+  position: absolute;
+}
 .disabled {
     pointer-events: none;
     opacity: 0.5;
 }
+
+.tab-button {
+    margin-top: 2rem;
+    background-color: cadetblue;
+    border: none;
+    color: darkmagenta;
+    width: 8rem;
+    height: 3rem;
+    border: 1px solid black;
+  }
+  .tab-button:hover {
+    background: cornflowerblue;
+    color: black;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+  td,
+  th {
+    border: 1px solid #0a0a0a;
+    text-align: center;
+    padding: 8px;
+  }
+
+  tr:nth-child(1) {
+    background-color: #c6fff3;
+  }
+  #table h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #0a0a0a;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  #table {
+    margin-top: 2rem;
+    margin-bottom: 3rem;
+  }
+  table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+    
+  }
+
+ 
+  
