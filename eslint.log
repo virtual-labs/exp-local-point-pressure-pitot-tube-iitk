@@ -1,0 +1,11 @@
+
+/home/runner/work/exp-local-point-pressure-pitot-tube-iitk/exp-local-point-pressure-pitot-tube-iitk/experiment/simulation/css/js/main.js
+   1:10  warning  'changeImage' is defined but never used  no-unused-vars
+  24:10  warning  'datasheet1' is defined but never used   no-unused-vars
+
+/home/runner/work/exp-local-point-pressure-pitot-tube-iitk/exp-local-point-pressure-pitot-tube-iitk/experiment/simulation/js/main.js
+   1:10  warning  'changeImage' is defined but never used  no-unused-vars
+  24:10  warning  'datasheet1' is defined but never used   no-unused-vars
+
+✖ 4 problems (0 errors, 4 warnings)
+
