@@ -1,169 +1,596 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <link rel="stylesheet" href="./css/simulation.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pitot Tube V-Lab</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+
     <style>
+        /* --- LAYOUT & CSS --- */
+        :root {
+            --primary: #0a192f;
+            --secondary: #172a45;
+            --accent: #64ffda;
+            --water: rgba(0, 191, 255, 0.85); /* Blue Water */
+            --text-light: #ccd6f6;
+            --white: #ffffff;
+            --shadow-3d: 0 10px 30px -10px rgba(2,12,27,0.7);
+        }
+
         body {
-            background-image: url('images/Fluid.png');
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            margin: 0; padding: 0;
+            background-image: url('Fluid.png');
+            background-size: cover; background-attachment: fixed;
+            height: 100vh; width: 100vw;
+            display: flex; overflow: hidden;
         }
-         #instruction-box {
-            margin: 20px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: bold;
-            max-width: 800px;
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 260px; background: rgba(10, 25, 47, 0.98);
+            backdrop-filter: blur(10px); color: var(--white);
+            display: flex; flex-direction: column;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.3); z-index: 100;
+            flex-shrink: 0;
         }
-        button {
-            cursor: pointer;
+        .brand { padding: 20px; text-align: center; background: var(--white); border-bottom: 4px solid var(--accent); }
+        .brand img { max-width: 90%; height: auto; display: block; margin: 0 auto; }
+        .nav-links { list-style: none; padding: 0; margin: 20px 0; }
+        .nav-item {
+            padding: 18px 25px; cursor: pointer; transition: 0.3s;
+            display: flex; align-items: center; font-size: 1rem;
+            border-left: 4px solid transparent; color: var(--text-light);
+        }
+        .nav-item:hover { background: rgba(100, 255, 218, 0.1); color: var(--accent); }
+        .nav-item.active {
+            background: rgba(100, 255, 218, 0.15); border-left-color: var(--accent);
+            color: var(--white); font-weight: 600;
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1; padding: 20px; position: relative;
+            background: rgba(240, 242, 245, 0.9);
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        .page-section { display: none; height: 100%; flex-direction: column; animation: fadeIn 0.5s ease; }
+        .page-section.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        h1 { color: var(--primary); border-bottom: 3px solid var(--accent); display: inline-block; padding-bottom: 5px; margin: 0 0 15px 0; font-size: 1.5rem; flex-shrink: 0; }
+
+        /* PARTS SECTION */
+        .parts-container { flex: 1; overflow-y: auto; padding-right: 5px; }
+        .parts-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px; padding-bottom: 20px;
+        }
+        .part-card {
+            background: white; border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08); border-top: 4px solid var(--primary);
+            position: relative; display: flex; flex-direction: column; overflow: hidden;
+            transition: transform 0.2s;
+        }
+        .part-card:hover { transform: translateY(-5px); }
+        .part-img-container {
+            width: 100%; height: 180px; background: #fff;
+            display: flex; align-items: center; justify-content: center;
+            border-bottom: 1px solid #eee; padding: 10px;
+        }
+        .part-img-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .part-content { padding: 15px; }
+        .part-content h3 { margin: 0 0 8px 0; color: var(--primary); font-size: 1.1rem; }
+        .part-content p { color: #555; font-size: 0.9rem; line-height: 1.4; margin: 0; }
+        .part-number {
+            position: absolute; top: 10px; right: 10px;
+            background: var(--accent); color: var(--primary);
+            width: 25px; height: 25px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 0.9rem; z-index: 2;
+        }
+
+        /* SIMULATOR */
+        .sim-wrapper { display: flex; gap: 20px; flex: 1; min-height: 0; }
+        .machine-view {
+            flex: 3; background: white; border-radius: 15px;
+            position: relative; box-shadow: var(--shadow-3d); border: 1px solid #ddd;
+            overflow: hidden; display: flex; align-items: center; justify-content: center;
+        }
+        .machine-img { width: 100%; height: 100%; object-fit: contain; }
+
+        /* --- FLUID ANIMATIONS --- */
+        
+        /* 1. Manometer Fluid */
+        .fluid-col {
+            position: absolute; 
+            width: 0.7%; /* Narrower to fit inside tube */
+            background: var(--water);
+            bottom: 28%; 
+            height: 0px; /* HIDDEN INITIALLY */
+            transition: height 0.5s ease-out; 
+            z-index: 5; 
+        }
+        /* Finely tuned positions based on standard diagrams */
+        #left-col { left: 55.4%; } 
+        #right-col { left: 58.2%; }
+
+
+        /* 2. Pipe Flow Animation (New) */
+        .pipe-flow {
+            position: absolute;
+            background: var(--water);
+            opacity: 0; /* Hidden initially */
+            transition: opacity 1s;
+            z-index: 4;
+            pointer-events: none;
+        }
+        /* Horizontal flow in main pipe */
+        #main-pipe-flow {
+            top: 39%; left: 38.7%; 
+            width: 11.3%; height: 1.5%;
+            border-radius: 2px;
+        }
+        /* Vertical flow in Pitot Stem */
+        #pitot-stem-flow {
+            top: 34%; left: 44%;
+            width: 1%; height: 6%;
+        }
+
+        /* DOTS */
+        .dot-wrapper {
+            position: absolute; display: flex; flex-direction: column;
+            align-items: center; cursor: pointer; z-index: 20;
+        }
+        .dot {
+            width: 28px; height: 28px;
+            background: radial-gradient(circle, #ff5252 0%, #b71c1c 100%);
+            border: 2px solid white; border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255,0,0,0.8);
+            animation: pulse 2s infinite;
+            display: flex; justify-content: center; align-items: center;
+            color: white; font-weight: bold; font-size: 12px;
+        }
+        .dot-label {
+            background: rgba(10, 25, 47, 0.9); color: var(--accent);
+            padding: 3px 8px; border-radius: 4px; font-size: 0.8rem;
+            margin-top: 4px; font-weight: bold; white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .dot-wrapper:hover .dot { transform: scale(1.2); background: #ff0000; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 82, 82, 0.7); } 100% { box-shadow: 0 0 0 10px rgba(255, 82, 82, 0); } }
+
+        /* CONTROLS */
+        .instruction-panel {
+            flex: 1.2; min-width: 320px; display: flex; flex-direction: column;
+            gap: 15px; overflow-y: auto; padding-right: 5px;
+        }
+        .info-card {
+            background: white; padding: 15px; border-radius: 12px;
+            box-shadow: var(--shadow-3d); border-left: 5px solid var(--accent);
+        }
+        .guide-text { font-size: 0.95rem; line-height: 1.4; color: #333; min-height: 40px; }
+        .btn-start {
+            background: linear-gradient(90deg, #11998e, #38ef7d);
+            color: white; padding: 10px; width: 100%; border: none;
+            border-radius: 6px; font-size: 1rem; font-weight: bold;
+            cursor: pointer; margin-top: 10px; box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+        }
+        .btn-start:hover { transform: translateY(-2px); }
+        .btn-stop-audio {
+            background: #e74c3c; color: white; padding: 5px 10px;
+            border: none; border-radius: 4px; font-size: 0.8rem;
+            cursor: pointer; float: right; margin-bottom: 5px;
+        }
+        .controls-group {
+            background: #fff; padding: 15px; border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            opacity: 0.6; pointer-events: none; transition: opacity 0.5s;
+        }
+        .controls-group.active { opacity: 1; pointer-events: all; }
+        .readings-box {
+            background: #222; color: #0f0; padding: 12px;
+            border-radius: 6px; font-family: 'Courier New', monospace;
+            font-size: 0.9rem; margin-top: 10px;
+        }
+        .readings-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+
+        /* TABLE */
+        .table-container { flex: 1; overflow-y: auto; background: white; border-radius: 10px; padding: 10px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th { background: var(--primary); color: white; padding: 10px; position: sticky; top: 0; }
+        td { padding: 8px; border-bottom: 1px solid #ddd; text-align: center; }
+
+        /* ============================
+           RESPONSIVE MEDIA QUERIES 
+           ============================ */
+        @media screen and (max-width: 900px) {
+            body {
+                flex-direction: column;
+                height: auto; /* Unlock height for scrolling */
+                min-height: 100vh;
+                overflow-y: auto; /* Allow scroll */
+            }
+
+            /* Turn Sidebar into Top Bar */
+            .sidebar {
+                width: 100%;
+                height: auto;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0;
+            }
+            .brand { 
+                padding: 10px; 
+                border-bottom: none; 
+                border-right: 2px solid var(--accent);
+                width: 60px;
+            }
+            .brand img { max-height: 40px; width: auto; }
+            .nav-links {
+                display: flex;
+                flex-direction: row;
+                margin: 0;
+                overflow-x: auto; /* Horizontal scroll for small screens */
+                flex: 1;
+            }
+            .nav-item {
+                padding: 15px;
+                border-left: none;
+                border-bottom: 4px solid transparent;
+                white-space: nowrap;
+                font-size: 0.9rem;
+            }
+            .nav-item.active {
+                border-bottom-color: var(--accent);
+                border-left-color: transparent;
+                background: rgba(100, 255, 218, 0.1);
+            }
+
+            /* Adjust Main Content */
+            .main-content {
+                padding: 15px;
+                overflow: visible; /* Let content grow */
+                flex: none; /* Do not shrink/grow, take auto height */
+                min-height: calc(100vh - 80px);
+            }
+
+            /* Stack Simulation Components */
+            .sim-wrapper {
+                flex-direction: column;
+            }
+            .machine-view {
+                width: 100%;
+                flex: none;
+                height: auto;
+                /* Ensure image scales but containers keep aspect ratio so dots stay aligned */
+                aspect-ratio: 16/9; 
+                min-height: 250px;
+            }
+            .instruction-panel {
+                width: 100%;
+                min-width: auto;
+                flex: none;
+                overflow: visible;
+            }
+
+            /* Adjust Text & Elements */
+            h1 { font-size: 1.3rem; }
+            .controls-group, .info-card { padding: 12px; }
+            .btn-start { font-size: 0.9rem; padding: 12px; }
+            
+            /* Table Responsive */
+            .table-container {
+                overflow-x: auto; /* Horizontal scroll for table */
+            }
+            
+            /* Hide Dot labels on very small screens if they clutter, 
+               or make them smaller */
+            .dot-label {
+                font-size: 0.7rem;
+                padding: 2px 5px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .nav-item { padding: 12px 10px; font-size: 0.8rem; }
+            .machine-view { aspect-ratio: 4/3; } /* Taller aspect for mobile portrait if needed */
         }
     </style>
 </head>
 <body>
-    <button onclick="speakInstructions()" style="margin: 20px; padding: 10px; font-size: 16px;">
-            Instructions
-        </button>
-        <div id="instruction-box">Click "Instructions" to start the guide.</div>
-        <h1 id="header" style="background-color: aqua;">To determine the local point pressure with the help of pitot tube </h1>
-        <div class="option"> 
-            <span id="vProfile" style="font-size:22px; font-weight: 1000;">Velocity Profile</span>
-            <span id="Cd" style="font-size:22px;font-weight: 1000;">Coefficient of Velocity</span>
-        </div>
-        <h2 id="cd-head" style="display: none;">Coefficient of Velocity</h2>
-        <h2 id="vel-profile-head" style="display: none;">Velocity Profile</h2>
-        <div class="container">
-            <div class="buttonPlayers">
-                <div class="switch-button"><button id="switch" style="display: none;">Power On</button></div>
-                <div class="main-container">
-                    <div class="images">
-                        <img src="./images/pitot_tube_off.png" style="width:500px" id="off">
-                        <img src="./images/pitot_tube_on.png" style="width:500px; display: none;" id="on">
+
+    <nav class="sidebar">
+        <div class="brand"><img src="logo.png" alt="VLab Logo"></div>
+        <ul class="nav-links">
+            <li class="nav-item active" onclick="navTo('theory', this)">Theory & Aim</li>
+            <li class="nav-item" onclick="navTo('parts', this)">Parts Description</li>
+            <li class="nav-item" onclick="navTo('simulation', this)">3D Simulator</li>
+            <li class="nav-item" onclick="navTo('observation', this)">Data & Results</li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+
+        <section id="theory" class="page-section active">
+            <h1>Experiment Aim & Theory</h1>
+            <div style="overflow-y: auto; flex:1;">
+                <div class="info-card">
+                    <h3>Aim</h3>
+                    <p>To determine the local point pressure and calculate velocity flow with the help of a Pitot tube.</p>
+                </div><br>
+                <div class="info-card" style="border-left-color: #ff6f00;">
+                    <h3>Theory</h3>
+                    <p>A <strong>Pitot tube</strong> is a device used to measure flow velocity. It works on the principle of Bernoulli's theorem.</p>
+                    <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; text-align: center; margin: 20px 0;">
+                        <strong>Bernoulli's Equation:</strong><br> $$ V = \sqrt{2 \cdot g \cdot \Delta h} $$
                     </div>
-                    <div class="player">
-                        <lottie-player id="powerOn" mode="normal" src="./json/pitot_power_up.json"
-                            style="width: 500px;display:none">
-                        </lottie-player>
-                        <lottie-player id="left" mode="normal" src="./json/pitot_static.json"
-                            style="width: 500px;display:none">
-                        </lottie-player>
-                        <lottie-player id="right" mode="normal" src="./json/pitot_dynamic.json"
-                            style="width: 500px;display:none">
-                        </lottie-player>
+                    <p>Where \( \Delta h \) is the difference in manometer height (\(h_1 - h_2\)).</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="parts" class="page-section">
+            <h1>Apparatus Parts</h1>
+            <div class="parts-container">
+                <div class="parts-grid">
+                    <div class="part-card">
+                        <div class="part-number">1</div>
+                        <div class="part-img-container"><img src="Control Panel.png" alt="Control Panel"></div>
+                        <div class="part-content">
+                            <h3>Control Panel</h3>
+                            <p>Switches ON/OFF the power supply to the pump. Essential for safety and operation control.</p>
+                        </div>
                     </div>
-                    <div id="slider-container" style="display: none;">
-                        <span style="font-size: 18px;">Change Flowrate :</span>
-                        <input id="slider" type="range" min="0" max="100" value="0">
+                    <div class="part-card">
+                        <div class="part-number">2</div>
+                        <div class="part-img-container"><img src="Centrifugal Pump.png" alt="Pump"></div>
+                        <div class="part-content">
+                            <h3>Centrifugal Pump</h3>
+                            <p>Draws water from the sump tank and circulates it through the test pipe section.</p>
+                        </div>
+                    </div>
+                    <div class="part-card">
+                        <div class="part-number">3</div>
+                        <div class="part-img-container"><img src="Pitot Tube.png" alt="Pitot Tube"></div>
+                        <div class="part-content">
+                            <h3>Pitot Tube</h3>
+                            <p>L-shaped probe used to measure stagnation pressure at a specific point in the flow.</p>
+                        </div>
+                    </div>
+                    <div class="part-card">
+                        <div class="part-number">4</div>
+                        <div class="part-img-container"><img src="U-Tube Manometer.png" alt="Manometer"></div>
+                        <div class="part-content">
+                            <h3>U-Tube Manometer</h3>
+                            <p>Displays the pressure difference between static and stagnation pressure via fluid columns.</p>
+                        </div>
+                    </div>
+                    <div class="part-card">
+                        <div class="part-number">5</div>
+                        <div class="part-img-container"><img src="Flow Control Valve.png" alt="Valve"></div>
+                        <div class="part-content">
+                            <h3>Flow Control Valve</h3>
+                            <p>Regulates the discharge (Q) allowing for velocity variation during the experiment.</p>
+                        </div>
+                    </div>
+                    <div class="part-card">
+                        <div class="part-number">6</div>
+                        <div class="part-img-container"><img src="Measuring Tank.png" alt="Tank"></div>
+                        <div class="part-content">
+                            <h3>Measuring Tank</h3>
+                            <p>Collects water to measure actual discharge rate using the rise in water level over time.</p>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="aside-container">
-                <lottie-player id="pinHeightSlider" mode="normal" src="./json/PitotPinAnim.json" style="width: 300px;">
-                </lottie-player>
-                <div class="arrows" style="display: none;">
-                    <div><img id="upArrow" src="./images/upload.png"></div>
-                    <div><img id="downArrow" src="./images/download.png"></div>
+        </section>
+
+        <section id="simulation" class="page-section">
+            <h1>Interactive Simulator</h1>
+            <div class="sim-wrapper">
+                <div class="machine-view">
+                    <img src="pitot_tube_off.png" id="simImg" class="machine-img" alt="Setup">
+                    
+                    <div id="main-pipe-flow" class="pipe-flow"></div>
+                    <div id="pitot-stem-flow" class="pipe-flow"></div>
+
+                    <div id="left-col" class="fluid-col"></div>
+                    <div id="right-col" class="fluid-col"></div>
+
+                    <div class="dot-wrapper" style="top: 25%; left: 13%;" onclick="interact('panel')"><div class="dot">1</div><div class="dot-label">Control Panel</div></div>
+                    <div class="dot-wrapper" style="top: 82%; left: 18%;" onclick="interact('pump')"><div class="dot">2</div><div class="dot-label">Pump</div></div>
+                    <div class="dot-wrapper" style="top: 36%; left: 73%;" onclick="interact('valve')"><div class="dot">3</div><div class="dot-label">Flow Valve</div></div>
+                    <div class="dot-wrapper" style="top: 36%; left: 38%;" onclick="interact('pitot')"><div class="dot">4</div><div class="dot-label">Pitot Tube</div></div>
+                    <div class="dot-wrapper" style="top: 15%; left: 61%;" onclick="interact('manometer')"><div class="dot">5</div><div class="dot-label">Manometer</div></div>
+                </div>
+
+                <div class="instruction-panel">
+                    <div class="info-card">
+                        <button class="btn-stop-audio" onclick="toggleAudio()">🔊 Mute</button>
+                        <h3><span style="color:var(--accent)">●</span> Live Guide</h3>
+                        <div id="guide-msg" class="guide-text">Click <strong>"Start Simulation"</strong> to begin.</div>
+                        <button class="btn-start" onclick="startSim()">Start Simulation</button>
+                    </div>
+
+                    <div id="controls-box" class="controls-group">
+                        <label><strong>Change Flow Rate:</strong></label>
+                        <input type="range" id="flowSlider" min="0" max="100" value="0" oninput="updateCalculations(this.value)">
+                        
+                        <div class="readings-box">
+                            <div class="readings-row"><span>h1: <span id="h1-txt">0.00</span></span><span>h2: <span id="h2-txt">0.00</span></span></div>
+                            <div style="text-align:center; border-top:1px solid #555; margin-top:5px;">$$ V = \sqrt{2 \cdot 9.81 \cdot \Delta h} $$</div>
+                            <div style="text-align:center; font-size:1.1rem; font-weight:bold; margin-top:5px;">V = <span id="vel-txt">0.00</span> m/s</div>
+                        </div>
+                        <button class="btn-start" style="background:var(--primary);" onclick="recordData()">Record Reading</button>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="reading-table-container" style="margin-top:50px;">
-            <table id="vel-profile-reading" style="display: none;">
-                <tr>
-                    <th id="writeFlowRate" colspan="3">Q = </th>
-                </tr>
-                <tr>
-                    <th>R</th>
-                    <th>h1 (cm)</th>
-                    <th>h2 (cm)</th>
-                </tr>
-                <tr id="row-insert">
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-            </table>
-            <table id="cd-reading" style="display:none;">
-                <tr>
-                    <th>Q x \(10^{-1}\) (L/s)</th>
-                    <th>h1 (cm)</th>
-                    <th>h2 (cm)</th>
-                </tr>
-                <tr id="cd-row-insert">
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-            </table>
-            <div class="save" style="display: none;"><button id="save-btn">save</button></div>
-            <div class="obs-table-container" style="display: none;"><button id="show-obs-table" style="background-color: aqua;">Show Observation Table</button></div>
-        </div>
-        <div id="obsTableContainer" style="display: none;">
-            <h1>Observation Table :</h1>
-            <div class="observation">
-                <table id="vel-obsTable" style="display: none;">
-                    <tr>
-                        <th id="writeFlowRateInObs" colspan="3"></th>
-                    </tr>
-                    <tr>
-                        <th>R</th>
-                        <th>h1 (cm)</th>
-                        <th>h2 (cm)</th>
-                    </tr>
-                </table>
-                <table id="cd-obsTable" style="display: none;">
-                    <tr>
-                        <th>Q x \(10^{-1}\) (L/s)</th>
-                        <th>h1 (cm)</th>
-                        <th>h2 (cm)</th>
-                    </tr>
+        </section>
+
+        <section id="observation" class="page-section">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h1>Observation Table</h1>
+                <button class="btn-start" style="width:auto; margin:0;" onclick="downloadPDF()">Download PDF</button>
+            </div>
+            <div class="table-container">
+                <table id="obsTable">
+                    <thead><tr><th>Trial No.</th><th>Flow Rate (%)</th><th>Head Diff (Δh in m)</th><th>Velocity (m/s)</th></tr></thead>
+                    <tbody></tbody>
                 </table>
             </div>
-        </div>
-        <div id="export" style="display: none;"><button id="toExcel">Export to Excel</button></div>
-        <div class="next"></div>
-    </div>
-    <script src="https://unpkg.com/@lottiefiles/lottie-player@0.4.0/dist/tgs-player.js"></script>
-    <script src="./js/calculation.js"></script>
-    <script src="./js/table2excel.js"></script>
-    <script src="./js/script.js"></script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        </section>
+
+    </main>
+
+    <audio id="pumpAudio" src="voice.mp3" ></audio>
+
     <script>
-        function speakInstructions() {
-            const steps = [
-                "Welcome to the Pitot Tube Apparatus Simulation.",
-                "First, observe the two options: Velocity Profile and Coefficient of Velocity.",
-                "Click on the Power On button to start the apparatus.",
-                "Watch the image change from Off to On.",
-                "Use the slider below to change the flow rate of water.",
-                "Observe changes in the animation and readings.",
-                "Use the Up and Down arrows to adjust the pin height.",
-                "Once you are done, you can save the values and export to Excel.",
-                "Replay this guide anytime using the button above."
-            ];
-            let index = 0;
-            const box = document.getElementById("instruction-box");
-            box.innerText = "";
-            function speakStep() {
-                if (index >= steps.length) return;
-                const text = steps[index];
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.rate = 1;
-                utterance.pitch = 1;
-                utterance.lang = 'en-US';
-                // Update instruction on screen
-                box.innerText = text;
-                speechSynthesis.speak(utterance);
-                index++;
-                utterance.onend = () => {
-                    setTimeout(speakStep, 800); // Move to next step after a pause
-                };
+        let step = 0;
+        let flowVal = 0;
+        let deltaH = 0;
+        let velocity = 0;
+        let trial = 0;
+        const pumpSound = document.getElementById('pumpAudio');
+        let isMuted = false;
+
+        function navTo(pageId, el) {
+            document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function toggleAudio() {
+            isMuted = !isMuted;
+            const btn = document.querySelector('.btn-stop-audio');
+            if(isMuted) { pumpSound.muted = true; btn.innerHTML = "🔇 Unmute"; window.speechSynthesis.cancel(); } 
+            else { pumpSound.muted = false; btn.innerHTML = "🔊 Mute"; }
+        }
+
+        function speak(text) {
+            if ('speechSynthesis' in window && !isMuted) {
+                window.speechSynthesis.cancel();
+                let u = new SpeechSynthesisUtterance(text);
+                u.rate = 1.0; window.speechSynthesis.speak(u);
             }
-            speechSynthesis.cancel(); // Stop previous speech
-            speakStep(); // Start steps
+        }
+
+        function startSim() {
+            step = 1;
+            document.getElementById('guide-msg').innerHTML = "Step 1: Click the <strong>Control Panel (1)</strong> to switch ON power.";
+            speak("Welcome to Fluid mechanics lab. To determine the local point pressure with the help of pitot tube. Step 1. Click the Control Panel to switch on the power.");
+        }
+
+        function interact(part) {
+            if (step === 0) return alert("Click Start Simulation first.");
+
+            // 1. CONTROL PANEL
+            if (part === 'panel') {
+                if (step === 1) {
+                    step = 2;
+                    document.getElementById('guide-msg').innerHTML = "Power ON.<br>Step 2: Click <strong>Pump (2)</strong> to start the motor.";
+                    speak("Power On. Step 2. Click the Pump to start the motor.");
+                } else if (step > 1) speak("Panel is already On.");
+            }
+            // 2. PUMP
+            else if (part === 'pump') {
+                if (step === 1) { speak("Please turn on the Control Panel first."); alert("⚠️ Turn on Panel first!"); }
+                else if (step === 2) {
+                    step = 3;
+                    document.getElementById('simImg').src = "pitot_tube_on.png";
+                    pumpSound.play().catch(e => console.log("Audio play failed"));
+                    
+                    // SHOW PIPE FLOW
+                    document.getElementById('main-pipe-flow').style.opacity = '0.6';
+                    document.getElementById('pitot-stem-flow').style.opacity = '0.6';
+
+                    document.getElementById('guide-msg').innerHTML = "Pump Running.<br>Step 3: Click <strong>Flow Valve (3)</strong> to open flow.";
+                    speak("Pump running. Step 3. Click the Flow Valve to open the flow.");
+                } else if (step > 2) speak("Pump is already running.");
+            }
+            // 3. VALVE
+            else if (part === 'valve') {
+                if (step < 3) { speak("Please start the Pump first."); alert("⚠️ Start Pump first!"); }
+                else if (step === 3) {
+                    step = 4;
+                    document.getElementById('controls-box').classList.add('active'); 
+                    document.getElementById('flowSlider').value = 50;
+                    updateCalculations(50); 
+                    
+                    animateWater(); 
+                    
+                    document.getElementById('guide-msg').innerHTML = "Flow Started.<br>Step 4: Use Slider to change flow, then click <strong>Pitot Tube (4)</strong> to align.";
+                    speak("Flow established. You can see the change flow rate line is now active. Adjust the slider, then click the Pitot Tube.");
+                }
+            }
+            // 4. PITOT TUBE
+            else if (part === 'pitot') {
+                if (step < 4) { speak("Please open the Flow Valve first."); alert("⚠️ Open Flow Valve first!"); }
+                else if (step === 4) {
+                    step = 5;
+                    document.getElementById('guide-msg').innerHTML = "Pitot Aligned.<br>Step 5: Click <strong>Manometer (5)</strong> to observe reading.";
+                    speak("Pitot tube aligned. Step 5. Click the Manometer to observe the reading.");
+                }
+            }
+            // 5. MANOMETER
+            else if (part === 'manometer') {
+                if (step < 5) { speak("Please align the Pitot Tube first."); alert("⚠️ Align Pitot Tube first!"); }
+                else if (step === 5) {
+                    step = 6;
+                    document.getElementById('guide-msg').innerHTML = "Observation Mode.<br>Adjust slider to see changes & click <strong>Record Reading</strong>.";
+                    speak("Manometer levels stabilized. Record your reading or adjust flow to take multiple trials.");
+                }
+            }
+        }
+
+        function updateCalculations(val) {
+            flowVal = val;
+            let factor = val / 100;
+            deltaH = (0.3 * factor).toFixed(3);
+            let h1 = (0.2 + parseFloat(deltaH)).toFixed(3);
+            let h2 = 0.200;
+            velocity = Math.sqrt(2 * 9.81 * deltaH).toFixed(3);
+            if(isNaN(velocity)) velocity = 0;
+
+            document.getElementById('h1-txt').innerText = h1;
+            document.getElementById('h2-txt').innerText = h2;
+            document.getElementById('vel-txt').innerText = velocity;
+
+            if (step >= 4) animateWater();
+        }
+
+        function animateWater() {
+            let factor = flowVal / 100;
+            // INCREASED HEIGHT MULTIPLIERS FOR BETTER VISIBILITY
+            let h1_rise = 220 * factor; 
+            let h2_rise = 80 * factor;
+            
+            if (step >= 4) {
+                document.getElementById('left-col').style.height = (20 + h1_rise) + "px"; 
+                document.getElementById('right-col').style.height = (20 + h2_rise) + "px";
+            }
+        }
+
+        function recordData() {
+            if(step < 6) { alert("Please complete the experiment steps first."); return; }
+            trial++;
+            const tbody = document.querySelector('#obsTable tbody');
+            tbody.innerHTML += `<tr><td>${trial}</td><td>${flowVal} %</td><td>${deltaH}</td><td>${velocity}</td></tr>`;
+            speak("Reading recorded.");
+        }
+
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text("Pitot Tube Experiment Results", 14, 15);
+            doc.autoTable({ html: '#obsTable', startY: 20, theme: 'striped', headStyles: { fillColor: [10, 25, 47] } });
+            doc.save('Pitot_Results.pdf');
         }
     </script>
 </body>
