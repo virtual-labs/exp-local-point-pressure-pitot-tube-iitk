@@ -45,6 +45,6 @@ SrNo | Name | Faculty or Student | Department| Institute | Email id
 3 | Er. Anjali Srivastava | Faculty | Food Technology | Institute of Engineering & Technology, Bundelkhand University, Jhansi | fetbujhansi@gmail.com
 4 | Dr. Anupam Vyas  | Faculty | Electronics & Communication Engineering | Institute of Engineering & Technology, Bundelkhand University, Jhansi | dr.anupam@bujhansi.ac.in
 5 | Dr. Sanjeev Kumar Shrivastava  | Faculty | Physics | Bundelkhand University, Jhansi | sksphys7@gmail.com
-6 | Pallavi Sahu | Student | Computer Science & Engineering | Institute of Engineering & Technology, Bundelkhand University, Jhansi | 
+6 | Pallavi Sahu | Student | Computer Science & Engineering | Institute of Engineering & Technology, Bundelkhand University, Jhansi | sahupalak9936@gmail.com
 
 
