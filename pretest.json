@@ -1,0 +1,63 @@
+{
+    "version": 2.0,
+    "questions": [
+      {
+        "question": "1. Which principle does a Pitot tube utilize to measure fluid velocity",
+        "answers": {
+          "a": "Archimede’s principle",
+          "b": "Newtons Law of viscosity",
+          "c": "Pascal’s principle",
+          "d": "Bernoulli’s principle"
+        },
+        
+        "correctAnswer": "d",
+        "difficulty": "beginner"
+      },
+      {
+        "question": "2. Pitot tube can be used to measure:",
+        "answers": {
+          "a": "The velocity of water in river",
+          "b": "The velocity of air in an aircraft",
+          "c": "Velocity of fluid in pipe",
+          "d": "All of the above"
+        },
+       
+        "correctAnswer": "b",
+        "difficulty": "beginner"
+      },
+      {
+        "question":"3. In a Pitot tube setup, the rise of liquid in the vertical limb is due to:",
+        "answers":{
+          "a": "Conversion of kinetic energy to pressure energy",
+          "b": "Conversion of pressure energy to kinetic energy",
+          "c": "Conversion of kinetic energy to potential energy",
+          "d": "Conversion of potential energy to kinetic energy"
+        },
+        "correctAnswer":"a",
+        "difficulty":"beginner"
+      },
+      {
+        "question":"4. The difference between the total pressure and static pressure is known as",
+        "answers":{
+          "a": "Stagnant pressure",
+          "b": "Dynamic pressure",
+          "c": "Atmospheric pressure",
+          "d": "None of above"
+        },
+        "correctAnswer":"b",
+        "difficulty":"beginner"
+      },
+      {
+        "question": "5. A Pitot tube measures the velocity of a fluid flow by:",
+        "answers":{
+          "a":"Measuring the change in pressure of the fluid",
+          "b":"Measuring the change in viscosity of the fluid",
+          "c":"Measuring the change in density of the fluid",
+          "d":"Measuring the change in temperature of the fluid"
+        },
+        "correctAnswer":"a",
+        "difficulty":"beginner"
+      }
+    
+    ]
+  }
