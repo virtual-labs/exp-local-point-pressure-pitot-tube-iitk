@@ -2,103 +2,59 @@
     "version": 2.0,
     "questions": [
       {
-        "question": "1.The metacentric height of a floating body is?",
+        "question": "1. Pitot tube is used to measure ",
         "answers": {
-          "a": "The distance between metacentre and centre of buoyancy.",
-          "b": "The distance between centre of buoyancy and centre of gravity.",
-          "c": "The distance between metacentre and centre of gravity",
-          "d": "None of the above"
+          "a": "Velocity at stagnation point",
+          "b": "Stagnation pressure",
+          "c": "Static pressure ",
+          "d": "Dynamic pressure"
         },
         
-        "correctAnswer": "c",
+        "correctAnswer": "b",
         "difficulty": "beginner"
       },
       {
-        "question": "2. Which of the following is not a term used for equilibrium of floating and submerged bodies?",
+        "question": "2. What is the point inside the Pitot tube where the liquid is stagnant known as?",
         "answers": {
-          "a": "Centre of gravity",
-          "b": "Centre of buoyancy",
-          "c": "Momentum point",
-          "d": "Metacentre"
+          "a": "Flow point",
+          "b": "Pressure point",
+          "c": "Stagnation point",
+          "d": "Velocity point"
         },
        
         "correctAnswer": "c",
         "difficulty": "beginner"
       },
       {
-        "question": "3. A piece of metal of specific gravity 3.4 floats in mercury of a specific gravity 13.6. What fraction of its volume is under Mercury?",
+        "question": "3. What is the key factor that determines the velocity in the Pitot tube experiment?",
         "answers":{
-          "a": "0.5",
-          "b": "Full",
-          "c": "0.25",
-          "d": "0.75"
+          "a": "Head Difference",
+          "b": "Liquid density",
+          "c": "Tube Diameter",
+          "d": "Tube Length"
         },
-        "correctAnswer": "c",
+        "correctAnswer": "a",
         "difficulty":"beginner"
       },
       {
-        "question": "4. When a body floating in a liquid is displayed slightly it oscillates about __________.",
+        "question": "4. What is the shape of a Pitot tube's circular cross-section?",
         "answers":{
-          "a": "Centre of gravity of body.",
-          "b": "Centre of pressure",
-          "c": "Metacentre",
-          "d": "None of the above"
-        },
-        "correctAnswer":"c",
-        "difficulty":"beginner"
-      },{
-        "question": "5. Which of the following conditions is used to determine the stable equilibrium of all partially submerged floating bodies?",
-        "answers":{
-          "a":"Centre of the AN buoyancy must be above the centre of gravity.",
-          "b":"Centre of buoyancy must be below the centre of gravity",
-          "c": "Metacentre must be at the higher level than the centre of gravity",
-          "d": "Metalcentre must be at a lower level than the centre of gravity."
-        },
-        "correctAnswer":"c",
-        "difficulty":"beginner"
-      },
-      {
-        "question":"6. A body of specific weight W1 floats on a liquid of specific weight W2? Then the ratio of the volume of the object above the liquid to its volume is",
-        "answers":{
-          "a": "(W2 - W1)/W2",
-          "b": "W2/(W2 - W1)",
-          "c": "(W2 - W1 )/ W1",
-          "d":"W1/( W2- W1)"
-        },
-        "correctAnswer":"a",
-        "difficulty":"beginner"
-      },
-      {
-        "question":"7. A piece of metal of specific gravity 7 floats in Mercury of a specific gravity 13.6. What fraction of its volume is under Mercury?",
-        "answers":{
-          "a": "0.5",
-          "b": "0.4",
-          "c":"0.515",
-          "d":"0.2"
-        },
-        "correctAnswer":"c",
-        "difficulty":"beginner"
-      },
-      {
-        "question": "8. Metacentric height is the distance between",
-        "answers":{
-          "a":"Water surface and centre of pressure",
-          "b": "Meta centre and centre of gravity",
-          "c":"Metacentre and centre of buoyancy.",
-          "d": "Metacentre and water surface"
+          "a": "T",
+          "b": "L",
+          "c": "I",
+          "d": "O"
         },
         "correctAnswer":"b",
         "difficulty":"beginner"
-      },
-      {
-        "question":"9. For the stability of a floating body the",
+      },{
+        "question": "5. What is the conclusion drawn from the experiment regarding the relationship between velocity and head difference?",
         "answers":{
-          "a":"Centre of buoyancy must coincide with the centre of gravity",
-          "b":"Centre of buoyancy must be above the centre of gravity",
-          "c":"Centre of gravity must be above the centre of buoyancy",
-          "d": "Metacentre must be above the centre of gravity"
+          "a": "Unrelated",
+          "b": "Directly proportional",
+          "c": "Inversely proportional",
+          "d": "constant"
         },
-        "correctAnswer":"d",
+        "correctAnswer":"b",
         "difficulty":"beginner"
       }
     ]
