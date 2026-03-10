@@ -1,0 +1,61 @@
+{
+    "version": 2.0,
+    "questions": [
+      {
+        "question": "1. Pitot tube is used to measure ",
+        "answers": {
+          "a": "Velocity at stagnation point",
+          "b": "Stagnation pressure",
+          "c": "Static pressure ",
+          "d": "Dynamic pressure"
+        },
+        
+        "correctAnswer": "b",
+        "difficulty": "beginner"
+      },
+      {
+        "question": "2. What is the point inside the Pitot tube where the liquid is stagnant known as?",
+        "answers": {
+          "a": "Flow point",
+          "b": "Pressure point",
+          "c": "Stagnation point",
+          "d": "Velocity point"
+        },
+       
+        "correctAnswer": "c",
+        "difficulty": "beginner"
+      },
+      {
+        "question": "3. What is the key factor that determines the velocity in the Pitot tube experiment?",
+        "answers":{
+          "a": "Head Difference",
+          "b": "Liquid density",
+          "c": "Tube Diameter",
+          "d": "Tube Length"
+        },
+        "correctAnswer": "a",
+        "difficulty":"beginner"
+      },
+      {
+        "question": "4. What is the shape of a Pitot tube's circular cross-section?",
+        "answers":{
+          "a": "T",
+          "b": "L",
+          "c": "I",
+          "d": "O"
+        },
+        "correctAnswer":"b",
+        "difficulty":"beginner"
+      },{
+        "question": "5. What is the conclusion drawn from the experiment regarding the relationship between velocity and head difference?",
+        "answers":{
+          "a": "Unrelated",
+          "b": "Directly proportional",
+          "c": "Inversely proportional",
+          "d": "constant"
+        },
+        "correctAnswer":"b",
+        "difficulty":"beginner"
+      }
+    ]
+  }
